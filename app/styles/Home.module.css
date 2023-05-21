@@ -1,10 +1,10 @@
 /* Home Page */
 .button {
     background-color: var(--accent-color);
-    color: var(--primary-color);
+    color: white;
     border-radius: var(--br-md);
     font-size: var(--fs-sm);
-    font-weight: var(--fw-medium);
+    font-weight: var(--fw-bold);
     padding: 0.5rem 1rem;
     cursor: pointer;
 }

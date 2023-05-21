@@ -1,6 +1,18 @@
 import * as anchor from '@project-serum/anchor'
 import { useEffect, useMemo, useState } from 'react'
 import { TODO_PROGRAM_PUBKEY } from '../constants'
+import todoIDL from '../constants/todo.json'
+import toast from 'react-hot-toast'
+import { SystemProgram } from '@solana/web3.js'
+import { utf8 } from '@project-serum/anchor/dist/cjs/utils/bytes'
+import { findProgramAddressSync } from '@project-serum/anchor/dist/cjs/utils/pubkey'
+import { useAnchorWallet, useConnection, useWallet } from '@solana/wallet-adapter-react'
+import { authorFilter } from '../utils'
+
+/*
+import * as anchor from '@project-serum/anchor'
+import { useEffect, useMemo, useState } from 'react'
+import { TODO_PROGRAM_PUBKEY } from '../constants'
 import { IDL as profileIdl } from '../constants/idl'
 import toast from 'react-hot-toast'
 import { SystemProgram } from '@solana/web3.js'
@@ -172,4 +184,147 @@ export function useTodo() {
     const completedTodos = useMemo(() => todos.filter((todo) => todo.account.marked), [todos])
 
     return { initialized, initializeUser, loading, transactionPending, completedTodos, incompleteTodos, addTodo, markTodo, removeTodo }
+}
+ */
+
+
+// Static data that reflects the todo struct of the solana program
+let dummyTodos = [
+    {
+        account:{
+            idx: '0',
+            content: 'SIN No: ',
+            marked: true,
+        }
+
+    },
+    {
+        account:{
+            idx: '1',
+            content: 'Understand Static Todo App',
+            marked: true,
+        }
+
+    },
+    {
+        account:{
+            idx: '2',
+            content: 'Read next chapter of the book in Danish',
+            marked: true,
+        }
+    },
+    {
+        account:{
+            idx: '3',
+            content: 'Do the math for next monday',
+            marked: true,
+        }
+    },
+    {
+        account:{
+            idx: '4',
+            content: 'Send the finished assignment',
+            marked: true,
+        }
+    },
+]
+
+export function useTodo() {
+    const { connection } = useConnection()
+    const { publicKey } = useWallet()
+    const anchorWallet = useAnchorWallet()
+
+    const [initialized, setInitialized] = useState(false)
+    const [lastTodo, setLastTodo] = useState(0)
+    const [todos, setTodos] = useState([])
+    const [loading, setLoading] = useState(false)
+    const [transactionPending, setTransactionPending] = useState(false)
+    const [input, setInput] = useState("")
+
+
+    const program = useMemo(() => {
+        if (anchorWallet) {
+            const provider = new anchor.AnchorProvider(connection, anchorWallet, anchor.AnchorProvider.defaultOptions())
+            return new anchor.Program(todoIDL, TODO_PROGRAM_PUBKEY, provider)
+        }
+    }, [connection, anchorWallet])
+
+    useEffect(() => {
+
+        if(initialized) {
+            setTodos(dummyTodos)
+        }
+
+
+    }, [initialized])
+
+    const handleChange = (e)=> {
+        setInput(e.target.value)
+    }
+  
+    const initializeStaticUser = () => {
+        setInitialized(true)
+    }
+
+    const addStaticTodo = (e) => {
+        e.preventDefault()
+        if(input) {
+            const newTodo = {
+                account:{
+                    idx: parseInt(todos[todos.length-1].account.idx) + 1,
+                    content: input,
+                    marked: true
+                }
+            }
+            dummyTodos.push(newTodo);
+            setTodos([...dummyTodos])
+            setInput("")
+        }
+    }
+
+    const markStaticTodo = (todoID) => {
+        setTodos(
+          todos.map(todo => {
+            console.log(todo.account, todoID, "YTAAAAA")
+            if (todo.account.idx === todoID) {
+                console.log("MATCHED")
+                return {
+                  account: {
+                    idx: todo.account.idx,
+                    content: todo.account.content,
+                    marked: !todo.account.marked
+                  }
+                }
+            }
+    
+            return todo
+          }),
+        )
+    }
+
+    const removeStaticTodo = async (todoID) => {
+        setTodos(
+            todos.filter(todo => {
+              if (todo.account.idx === todoID) {
+                
+                return 
+              }
+      
+              return todo
+            }),
+          )
+          for (let i = 0; i < dummyTodos.length; i++) {
+            if (dummyTodos[i].account.idx === todoID) {
+                dummyTodos.splice(i, 1);
+            }
+        }
+    }
+
+
+    /* const incompleteTodos = useMemo(() => todos.filter((todo) => !todo.account.marked), [todos]) */
+    const completedTodos = useMemo(() => todos.filter((todo) => todo.account.marked), [todos])
+
+    return { initialized, initializeStaticUser, loading, transactionPending, 
+        completedTodos, markStaticTodo, removeStaticTodo,
+        addStaticTodo, input, setInput, handleChange }
 }
