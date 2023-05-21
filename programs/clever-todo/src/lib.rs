@@ -48,7 +48,7 @@ pub mod clever_todo {
 
     pub fn mark_todo(ctx: Context<MarkTodo>, todo_idx: u8) -> Result<()> {
         let todo_account = &mut ctx.accounts.todo_account;
-        require!(!todo_account.marked, TodoError::AlreadyMarked);
+        require!(!todo_account.marked, ToDoError::AlreadyMarked);
 
         // Mark todo
         todo_account.marked = true;
