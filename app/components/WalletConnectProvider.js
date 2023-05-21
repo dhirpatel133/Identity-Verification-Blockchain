@@ -12,7 +12,7 @@ export const WalletConnectProvider = ({ children }) => {
     // You can also provide a custom RPC endpoint.
     const endpoint = useMemo(() => {
         if (network === WalletAdapterNetwork.Devnet) {
-            return 'https://api.devnet.solana.com'
+            return 'https://floral-boldest-sea.solana-devnet.discover.quiknode.pro/ef9e7bcc435694c896207af7693ddb64341fb39e/'
         }
 
         return clusterApiUrl(network)
